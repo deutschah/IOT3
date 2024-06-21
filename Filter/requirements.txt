@@ -1,0 +1,4 @@
+Flask
+paho-mqtt
+nats-py
+python-dotenv
