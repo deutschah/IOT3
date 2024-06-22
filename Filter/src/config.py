@@ -9,7 +9,7 @@ class Config:
     BROKER_ADDRESS = os.getenv('BROKER_ADDRESS')
     BROKER_PORT = int(os.getenv('BROKER_PORT'))
     MQTT_TOPIC = os.getenv('MQTT_TOPIC', 'sensor/data')
-    NATS_SERVER = os.getenv('NATS_SERVER', 'nats://localhost:4222')
+    NATS_SERVER = os.getenv('NATS_SERVER', 'nats://nats-server:4222')
     NATS_TOPIC = os.getenv('NATS_TOPIC', 'analytics.data')
     TIME_WINDOW_SIZE = int(os.getenv('TIME_WINDOW_SIZE', 60))
 

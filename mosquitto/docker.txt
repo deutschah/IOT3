@@ -1,0 +1,4 @@
+docker run -it -p 1883:1883 -p 9001:9001 -d --name mosquitto --net BRIDGE -v mosquitto.conf:/mosquitto/config -v /mosquitto/data -v /mosquitto/log eclipse-mosquitto:2
+
+
+docker cp ./config/mosquitto.conf mosquitto:/mosquitto/config

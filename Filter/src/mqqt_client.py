@@ -7,7 +7,7 @@ from queue import Empty, Queue
 
 class MQTTClient:
     def __init__(self, broker_address, broker_port, topic,message_queue):
-        self.broker_address = broker_address
+        self.broker_address = "my-mqtt-broker"
         self.broker_port = broker_port
         self.topic = topic
         self.client = None

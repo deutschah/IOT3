@@ -2,6 +2,7 @@ import asyncio
 import logging
 from queue import Empty
 import nats
+import json 
 
 class NATSClient:
     def __init__(self, nats_server, nats_topic, processed_queue):
@@ -20,7 +21,9 @@ class NATSClient:
             try:
                 message = self.processed_queue.get_nowait()
                 logging.info(f"Sending message to NATS: {message}")
-                await self.nc.publish(self.nats_topic, str(message).encode())
+                json_message = json.dumps(message)
+                await self.nc.publish(self.nats_topic, json_message.encode('utf-8'))
+                #await self.nc.publish(self.nats_topic, str(message).encode())
             except Empty:
                 await asyncio.sleep(1)  
             except Exception as e:

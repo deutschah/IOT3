@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  nats-server:
+    image: nats
+    container_name: nats-server
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    networks:
+      - iot-network
+
+  influxdb:
+    image: influxdb:2
+    container_name: influxdb
+    ports:
+      - "8087:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: deutschah
+      DOCKER_INFLUXDB_INIT_PASSWORD: Password
+      DOCKER_INFLUXDB_INIT_ORG: IOT3
+      DOCKER_INFLUXDB_INIT_BUCKET: IOT3
+      DOCKER_INFLUXDB_INIT_RETENTION: 0
+    volumes:
+      - influx-data3:/var/lib/influxdb2
+      - influx-config3:/etc/influxdb2
+    networks:
+      - iot-network
+
+  python-sensor:
+    build:
+      context: ./python-sensor
+    image: python-sensor
+    container_name: python-sensor
+    depends_on:
+      - nats-server
+      - influxdb
+    networks:
+      - iot-network
+
+  filter-service:
+    build:
+      context: ./filter-service
+    image: filter-service:latest
+    container_name: filter-service
+    environment:
+       - BROKER_PORT=1883
+       - NATS_SERVER=nats://nats-server:4222
+    depends_on:
+      - nats-server
+    networks:
+      - iot-network
+
+  dashboard-service:
+    build:
+      context: ./dashboard-service
+    image: dashboard-service:latest
+    container_name: dashboard-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nats-server
+      - influxdb
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=I8qPVnEyudv__zt_txtId-G4Wb0bIiUMfQETSVr6ZqR-xE421mVku7zSVkUFRtFQ0F2SNFJ2I5mgxIYPTlDdkQ==
+      - INFLUXDB_ORG=IOT3
+      - INFLUXDB_BUCKET=IOT3
+      - INFLUXDB_USERNAME=deutschah
+      - INFLUXDB_PASSWORD=Password
+    networks:
+      - iot-network
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - influxdb
+    networks:
+      - iot-network
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    
+
+  mqtt:
+    image: eclipse-mosquitto:2
+    container_name: my-mqtt-broker
+    volumes:
+      - mosquitto.conf:/mosquitto/config
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    networks:
+      - iot-network
+    ports:
+      - "1883:1883"
+
+networks:
+  iot-network:
+    driver: bridge
+
+volumes:
+  influx-data3:
+    external: true
+    name: influx-data3
+  influx-config3:
+    external: true
+    name: influx-config3
+  grafana-storage:
+    external: true 
+    name: grafana-storage
+  mosquitto-data:
+  mosquitto-log:
+  mosquitto.conf:
+    external: true
+    name: mosquitto.conf

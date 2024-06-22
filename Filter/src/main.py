@@ -27,7 +27,7 @@ if __name__ == "__main__":
         interval=15  
     )
     nats_client = NATSClient(
-        nats_server='nats://localhost:4222',
+        nats_server='nats://nats-server:4222',
         nats_topic='analytics.data',
         processed_queue=processed_queue
     )

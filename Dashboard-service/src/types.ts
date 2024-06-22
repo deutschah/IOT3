@@ -1,5 +1,7 @@
 export interface SensorData {
-    timestamp: string;
-    value: number;
-  }
-  
+  sensor: string;
+  DC_POWER: number;
+  AC_POWER: number;
+  DAILY_YIELD: number;
+  TOTAL_YIELD: number;
+}

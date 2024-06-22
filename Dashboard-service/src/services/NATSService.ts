@@ -13,11 +13,12 @@ class NATSService {
       logger.info(`Connected to NATS server at ${natsServer}`);
       this.subscription = this.nc.subscribe(topic);
       const sc = StringCodec();
-
+ 
       if (this.subscription) {
         (async () => {
           for await (const message of this.subscription!) { 
             const data: SensorData = JSON.parse(sc.decode(message.data));
+
             callback(data);
           }
         })();
