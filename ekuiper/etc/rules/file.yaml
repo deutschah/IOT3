@@ -1,0 +1,12 @@
+{
+  "sql": "SELECT avg(value) AS avg_value FROM mqtt_topic WHERE value > threshold GROUP BY HOPPINGWINDOW(ss, 10, 5)",
+  "actions": [
+    {
+      "mqtt": {
+        "server": "mqtt://my-mqtt-broker:1883",
+        "topic": "sensor/data",
+        "clientId": "ekuiper_client"
+      }
+    }
+  ]
+}

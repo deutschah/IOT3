@@ -86,7 +86,6 @@ services:
       - iot-network
     volumes:
       - grafana-storage:/var/lib/grafana
-    
 
   mqtt:
     image: eclipse-mosquitto:2
@@ -99,6 +98,64 @@ services:
       - iot-network
     ports:
       - "1883:1883"
+
+  manager:
+    image: emqx/ekuiper-manager
+    container_name: ekuiper-manager
+    ports:
+      - "9082:9082"
+    depends_on:
+      - mqtt
+    restart: unless-stopped
+    environment:
+      DEFAULT_EKUIPER_ENDPOINT: "http://ekuiper:9081"
+    networks:
+      - iot-network
+
+  ekuiper:
+    image: lfedge/ekuiper
+    ports:
+      - "9081:9081"
+      - "127.0.0.1:20498:20498"
+    container_name: ekuiper
+    hostname: ekuiper
+    depends_on:
+      - mqtt
+    restart: unless-stopped
+    user: root
+    volumes:
+      - kuiper.data:/kuiper/data
+      - kuiper.log:/kuiper/log
+    networks:
+      - iot-network
+    environment:
+      MQTT_SOURCE__DEFAULT__SERVER: "tcp://mosquitto:1883"
+      KUIPER__BASIC__CONSOLELOG: "true"
+      KUIPER__BASIC__IGNORECASE: "false"
+
+  command:
+    image: commandservice-image
+    container_name: command
+    depends_on:
+      - mqtt
+      - nats-server
+    networks:
+      - iot-network
+    environment:
+       - CLIENT_URL=http://client:80
+    ports:
+      - 4000:4000
+
+  client:
+    build: ./client
+    image: client-image
+    container_name: client
+    ports:
+      - "3002:80"
+    networks:
+      - iot-network
+    depends_on:
+      - command
 
 networks:
   iot-network:
@@ -119,3 +176,9 @@ volumes:
   mosquitto.conf:
     external: true
     name: mosquitto.conf
+  kuiper.data:
+    name: kuiper.data
+    external: true
+  kuiper.log:
+    name: kuiper.log
+    external: true
