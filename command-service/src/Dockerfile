@@ -1,13 +1,3 @@
-FROM node:14
+FROM nginx:alpine
 
-WORKDIR /usr/src/app
-
-COPY client/package*.json ./client/
-
-RUN cd client && npm install
-
-COPY client/ ./client/
-
-EXPOSE 3000
-
-CMD ["node", "./client/client.js"]
+COPY client.html /usr/share/nginx/html/index.html

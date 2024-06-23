@@ -1,28 +1,42 @@
-const mqtt = require('mqtt');
-const io = require('socket.io-client');
 const http = require('http');
+const socketIo = require('socket.io');
+const mqtt = require('mqtt');
 
+// MQTT broker URL
+const brokerUrl = 'mqtt://my-mqtt-broker:1883';
+
+// Logger for debugging
 const logger = {
   debug: console.log
 };
 
-const handler = (req, res) => {
-  res.writeHead(200);
+// Create HTTP server
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/plain',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  });
   res.end('Hello, world!');
-};
-
-const server = http.createServer(handler);
-const socket = io('http://client:80');
-
-socket.on('connect', () => {
-  logger.debug('Connected to Socket.IO server');
 });
 
-server.listen(4000, '0.0.0.0', () => {
-  console.log('Server running at http://127.0.0.1:4000/');
+// Set up Socket.IO server
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
 });
 
-const brokerUrl = 'mqtt://my-mqtt-broker:1883';
+io.on('connection', (socket) => {
+  console.log('Client connected');
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
 const client = mqtt.connect(brokerUrl);
 
 client.on('connect', () => {
@@ -37,5 +51,13 @@ client.on('connect', () => {
 });
 
 client.on('message', (topic, message) => {
-  console.log(`Received message on topic ${topic}: ${message.toString()}`);
+  const messageString = message.toString();
+  console.log(`Received message on topic ${topic}: ${messageString}`);
+
+  io.emit('mqtt_message', { topic, message: messageString });
+  console.log('Message emitted to Socket.IO clients');
+});
+
+server.listen(4000, '0.0.0.0', () => {
+  console.log('Server running at http://0.0.0.0:4000');
 });
