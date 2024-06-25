@@ -47,19 +47,21 @@ class MessageProcessor:
             ac_power_values = [obj.get('AC_POWER', 0) for obj in data_objects]
             total_yield_values = [obj.get('TOTAL_YIELD', 0) for obj in data_objects]
             total_daily_yield_values = [obj.get('DAILY_YIELD', 0) for obj in data_objects]
+            timestamps = [obj.get('DATE_TIME') for obj in data_objects]
 
- 
             avg_dc_power = sum(dc_power_values) / len(dc_power_values) if dc_power_values else 0
             avg_ac_power = sum(ac_power_values) / len(ac_power_values) if ac_power_values else 0
             avg_total_yield = sum(total_yield_values) / len(total_yield_values) if total_yield_values else 0
             avg_daily_yield = sum(total_daily_yield_values) / len(total_daily_yield_values) if total_daily_yield_values else 0
-
+            latest_timestamp = max(timestamps) if timestamps else None
             
             average_object = {
                 'DC_POWER': avg_dc_power,
                 'AC_POWER': avg_ac_power,
                 'TOTAL_YIELD': avg_total_yield,
-                'DAILY_YIELD': avg_daily_yield
+                'DAILY_YIELD': avg_daily_yield,
+                'TIME_STAMP': latest_timestamp
+
             }
 
             return average_object

@@ -3,17 +3,16 @@ import logging
 from config import config
 import paho.mqtt.client as mqtt
 from messageProcessor import MessageProcessor
-from mqqt_client import MQTTClient
+from mqtt_client import MQTTClient 
 from queue import Queue
-
 from nats_client import NATSClient
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    
-    messageQueue=Queue()
+    messageQueue = Queue()
     processed_queue = Queue()
+    
     mqtt_client = MQTTClient(
         broker_address=config.BROKER_ADDRESS,
         broker_port=config.BROKER_PORT,
@@ -24,15 +23,15 @@ if __name__ == "__main__":
     message_processor = MessageProcessor(
         message_queue=messageQueue,
         processed_queue=processed_queue,
-        interval=15  
+        interval=config.TIME_WINDOW_SIZE 
     )
+    
     nats_client = NATSClient(
-        nats_server='nats://nats-server:4222',
-        nats_topic='analytics.data',
+        nats_server=config.NATS_SERVER,
+        nats_topic=config.NATS_TOPIC,
         processed_queue=processed_queue
     )
 
-  
     try:
         message_processor.start()
         mqtt_client.start()

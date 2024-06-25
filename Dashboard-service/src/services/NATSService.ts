@@ -18,7 +18,6 @@ class NATSService {
         (async () => {
           for await (const message of this.subscription!) { 
             const data: SensorData = JSON.parse(sc.decode(message.data));
-
             callback(data);
           }
         })();

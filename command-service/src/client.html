@@ -4,6 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Client</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #007BFF;
+            transition: color 0.3s ease;
+        }
+
+        #messages {
+            width: 80%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .message:hover {
+            background-color: #d1d8e0;
+        }
+
+        .message-topic {
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .message-field {
+            color: #555;
+        }
+
+        .message-value {
+            color: #007BFF;
+        }
+
+        .message-content {
+            margin-top: 5px;
+            color: #333;
+        }
+
+        body.dark-mode {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        body.dark-mode h1 {
+            color: #1abc9c;
+        }
+
+        body.dark-mode #messages {
+            background-color: #34495e;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+    </style>
 </head>
 <body>
     <h1>WebSocket Client</h1>
@@ -21,8 +100,34 @@
             const messagesDiv = document.getElementById('messages');
             const messageElement = document.createElement('div');
             messageElement.className = 'message';
-            messageElement.textContent = `Topic: ${msg.topic}, Message: ${msg.message}`;
+            
+            const messageTopic = document.createElement('div');
+            messageTopic.className = 'message-topic';
+            messageTopic.textContent = `Topic: ${msg.topic}`;
+            
+            const messageField = document.createElement('div');
+            messageField.className = 'message-field';
+            messageField.textContent = `Field: ${msg.field}`;
+
+            const messageValue = document.createElement('div');
+            messageValue.className = 'message-value';
+            messageValue.textContent = `Value: ${msg.fieldValue}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = `Message: ${msg.message}`;
+
+            messageElement.appendChild(messageTopic);
+            messageElement.appendChild(messageField);
+            messageElement.appendChild(messageValue);
+            messageElement.appendChild(messageContent);
+            
             messagesDiv.appendChild(messageElement);
+
+            const messages = messagesDiv.querySelectorAll('.message');
+            if (messages.length > 6) {
+                messagesDiv.removeChild(messages[0]);
+            }
         });
 
         socket.on('disconnect', () => {
